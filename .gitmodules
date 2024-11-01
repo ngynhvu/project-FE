@@ -1,0 +1,3 @@
+[submodule "project-fe"]
+	path = project-fe
+	url = https://github.com/ngynhvu/project-FE.git
