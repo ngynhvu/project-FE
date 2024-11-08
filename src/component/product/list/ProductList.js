@@ -7,7 +7,7 @@ import {
 } from "../../../service/product/ProductService";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import "./list.css";
+import st from "./list.module.css";
 import {Dropdown} from 'react-bootstrap';
 import {Link} from "react-router-dom";
 import {getAllCategories} from "../../../service/product/CategoryService";
@@ -33,15 +33,15 @@ function ProductList() {
     useEffect(() => {
         try {
             console.log(isSearching)
-            if (isSearching){
-                if (searchCriterion === "name"){
+            if (isSearching) {
+                if (searchCriterion === "name") {
                     getProductsByName();
-                }else if (searchCriterion === "code"){
+                } else if (searchCriterion === "code") {
                     getProductByCode();
-                }else if (searchCriterion === "category"){
+                } else if (searchCriterion === "category") {
                     handleCategoryClick(categoryId);
                 }
-            }else {
+            } else {
                 getProducts(currentPage, sortBy, sortOrder)
             }
         } catch (e) {
@@ -53,24 +53,24 @@ function ProductList() {
         getAllCategories().then((data) => {
             setCategories(data);
         })
-    },[])
+    }, [])
     useEffect(() => {
         const filteredCategories = categories.filter(category =>
             category.categoryName.toLowerCase().includes("combo")
         );
         setComboCategories(filteredCategories)
         console.log(comboCategories)
-    },[categories])
+    }, [categories])
     const getProductsByName = () => {
         setSearchCriterion("name");
         setIsSearching(true);
         searchProductsByName(name, currentPage, pageSize).then((response) => {
             const {content, totalPages} = response.data;
-            if (content){
+            if (content) {
                 setProducts(content);
                 setTotalPages(totalPages);
                 setSearchResponse("");
-            }else {
+            } else {
                 setProducts([]);
                 setTotalPages(1);
                 setSearchResponse("Product not available");
@@ -82,17 +82,17 @@ function ProductList() {
         setSearchCriterion("code");
         setIsSearching(true);
         searchProductByCode(code).then((data) => {
-            if(data){
+            if (data) {
                 setProducts([data]);
                 setSearchResponse("");
-            }else {
+            } else {
                 setProducts([]);
                 setTotalPages(1);
                 setSearchResponse("Product not available");
             }
             console.log(data)
         })
-   }
+    }
 
     const getProducts = (page, sortBy, sortOrder) => {
         setIsSearching(false);
@@ -100,6 +100,7 @@ function ProductList() {
             const {content, totalPages} = response.data;
             setProducts(content);
             setTotalPages(totalPages);
+            setSearchResponse("");
             console.log(response.data)
             console.log(comboCategories)
         })
@@ -113,14 +114,15 @@ function ProductList() {
     const handleCategoryClick = (categoryId) => {
         setSearchCriterion("category");
         setIsSearching(true);
-        if (categoryId === null){
+        if (categoryId === null) {
             getProducts(currentPage, sortBy, sortOrder);
-        }else {
+        } else {
             searchProductsByCategory(categoryId, currentPage, pageSize).then((response) => {
                 const {content, totalPages} = response.data;
                 setProducts(content);
                 console.log(content)
                 setTotalPages(totalPages);
+                setSearchResponse("");
             }).catch((e) => {
                 console.log("Error fetching products by category: ", e);
             })
@@ -147,12 +149,12 @@ function ProductList() {
     //     return <p>Loading...</p>;
     // }
     return (
-        <div className="outer-div-1">
-            <h3 className="container-1">Product Management</h3>
-            <div className="container-1 mt-5">
+        <div className={st["outer-div-1"]}>
+            <h3 className={st["container-1"]}>Product Management</h3>
+            <div className={`${st["container-1"]} mt-5 ${st["list"]}`}>
                 <div className="d-flex justify-content-between">
                     <h5 style={{marginLeft: 'auto'}}>
-                        <Link to="/category" className="btn btn-primary btn-create-1" style={{
+                        <Link to="/category" className={`btn btn-primary ${st["btn-create-1"]}`} style={{
                             borderRadius: '50px',
                             border: 'none',
                             backgroundColor: '#bd965f',
@@ -161,7 +163,7 @@ function ProductList() {
                         }}>
                             <i className="fa-solid fa-bars" style={{color: '#f5f5f5'}}></i> Category
                         </Link>
-                        <Link to="/create" className="btn btn-primary btn-create-1" style={{
+                        <Link to="/create" className={`btn btn-primary ${st["btn-create-1"]}`} style={{
                             borderRadius: '50px',
                             border: 'none',
                             backgroundColor: '#bd965f',
@@ -173,37 +175,42 @@ function ProductList() {
                 </div>
 
                 {/*Tabs*/}
-                <ul className="nav nav-tabs">
+                <ul className={`nav nav-tabs`}>
                     <li className="nav-item">
-                        <button className="nav-link" onClick={() => handleCategoryClick(null)}>
+                        <button className={"nav-link"} onClick={() => handleCategoryClick(null)}>
                             All Products
                         </button>
                     </li>
                     {comboCategories.map(category => (
                         <li className="nav-item" key={category.categoryId}>
-                            <button className="nav-link" onClick={() => handleCategoryClick(category.categoryId)}>{category.categoryName}</button>
+                            <button className={"nav-link"}
+                                    onClick={() => {
+                                        handleCategoryClick(category.categoryId);
+                                        setCurrentPage(0);
+                                        setCategoryId(category.categoryId);
+                                    }}>{category.categoryName}</button>
                         </li>
                     ))}
                 </ul>
 
                 {/* Filter and Search */}
-                <div className="filter-section-1 d-flex justify-content-between align-items-center mt-3">
+                <div className={`${st["filter-section-1"]} d-flex justify-content-between align-items-center mt-3`}>
                     {/*Filter buttons*/}
-                    <div className="d-flex align-items-center">
-                        <div className="dropdown me-3">
+                    <div className="d-flex align-items-center ">
+                        <div className={`dropdown me-3 ${st["list"]}`}>
                             <button className="btn btn-light dropdown-toggle" type="button" id="statusDropdown"
                                     data-bs-toggle="dropdown">
                                 Category
                             </button>
-                            <ul className="dropdown-menu">
+                            <ul className={`dropdown-menu `}>
                                 <li>
-                                    <button className="dropdown-item" onClick={() => handleCategoryClick(null)}>
+                                    <button className={`dropdown-item `} onClick={() => handleCategoryClick(null)}>
                                         All Products
                                     </button>
                                 </li>
-                                {categories.map((category)=> (
+                                {categories.map((category) => (
                                     <li key={category.categoryId}>
-                                        <button className="dropdown-item" onClick={() => {
+                                        <button className={`dropdown-item `} onClick={() => {
                                             handleCategoryClick(category.categoryId);
                                             setCurrentPage(0);
                                             setCategoryId(category.categoryId);
@@ -216,15 +223,15 @@ function ProductList() {
                         </div>
 
                         <div className="input-group me-3">
-                            <span className="input-group-text bg-white border-end-0 search-hover-1" id="search-icon">
+                            <span className={`input-group-text bg-white border-end-0 ${st["search-hover-1"]}`} id="search-icon">
                                 <i className="bi bi-search"></i>
                             </span>
-                            <input type="text" className="form-control search-input-1 border-start-0 search-hover-1"
+                            <input type="text" className={`form-control search-input-1 border-start-0 ${st["search-hover-1"]}`}
                                    placeholder="Search By Name" aria-label="Search"
                                    value={name}
                                    onChange={(e) => setName(e.target.value)}
                                    onKeyDown={(e) => {
-                                       if (e.key === 'Enter'){
+                                       if (e.key === 'Enter') {
                                            setName(e.target.value);
                                            setCurrentPage(0);
                                            getProductsByName();
@@ -237,31 +244,31 @@ function ProductList() {
                             <span className="input-group-text bg-white border-end-0 search-hover-1" id="search-icon">
                                 <i className="bi bi-search"></i>
                             </span>
-                            <input type="text" className="form-control search-input-1 border-start-0 search-hover-1"
+                            <input type="text" className={`form-control search-input-1 border-start-0 ${st["search-hover-1"]}`}
                                    placeholder="Search By Code" aria-label="Search"
                                    value={code}
                                    onChange={(e) =>
                                        setCode(e.target.value.trim())
                                    }
                                    onKeyDown={(e) => {
-                                       if (e.key ==='Enter'){
+                                       if (e.key === 'Enter') {
                                            setCode(e.target.value);
                                            setCurrentPage(0);
                                            setTotalPages(1);
                                            getProductByCode();
                                        }
-                            }}
+                                   }}
 
                             />
                         </div>
 
-                        <div className="view-options-1 ms-3">
+                        <div className={`${st["view-options-1"]} ms-3 ${st["list"]}`}>
                             <Dropdown>
                                 <Dropdown.Toggle
                                     variant="link"
                                     id="dropdown-basic"
-                                    className="btn-sort-1"
-                                    style={{ color: 'inherit', border: 'none' }}
+                                    className={st["btn-sort-1"]}
+                                    style={{color: 'inherit', border: 'none'}}
                                     onMouseEnter={(e) => {
                                         e.target.style.color = '#bd965f'; // Thay đổi màu khi hover
                                     }}
@@ -272,13 +279,16 @@ function ProductList() {
                                     <i className="bi bi-list"></i>
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item className="dropdown-item-1" onClick={() => handleSortChange("productCode")}>
+                                    <Dropdown.Item className={`dropdown-item `}
+                                                   onClick={() => handleSortChange("productCode")}>
                                         Sort by code
                                     </Dropdown.Item>
-                                    <Dropdown.Item className="dropdown-item-1" onClick={() => handleSortChange("productName")}>
+                                    <Dropdown.Item className={`dropdown-item `}
+                                                   onClick={() => handleSortChange("productName")}>
                                         Sort by name
                                     </Dropdown.Item>
-                                    <Dropdown.Item className="dropdown-item-1" onClick={() => handleSortChange("productPrice")}>
+                                    <Dropdown.Item className={`dropdown-item `}
+                                                   onClick={() => handleSortChange("productPrice")}>
                                         Sort by price
                                     </Dropdown.Item>
                                 </Dropdown.Menu>
@@ -287,8 +297,8 @@ function ProductList() {
                                 <Dropdown.Toggle
                                     variant="link"
                                     id="dropdown-basic"
-                                    className="btn-sort-1"
-                                    style={{ color: 'inherit', border: 'none' }}
+                                    className={`${st["btn-sort-1"]} ${st["list"]}`}
+                                    style={{color: 'inherit', border: 'none'}}
                                     onMouseEnter={(e) => {
                                         e.target.style.color = '#bd965f'; // Thay đổi màu khi hover
                                     }}
@@ -299,82 +309,90 @@ function ProductList() {
                                     <i className="bi bi-grid"></i>
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item className="dropdown-item-1" onClick={() => {setSortOrder("asc"); setIsSearching(false);}}>Ascending</Dropdown.Item>
-                                    <Dropdown.Item className="dropdown-item-1" onClick={() => {setSortOrder("Desc"); setIsSearching(false);}}>Descending</Dropdown.Item>
+                                    <Dropdown.Item className={`dropdown-item ${st["list"]}`} onClick={() => {
+                                        setSortOrder("asc");
+                                        setIsSearching(false);
+                                    }}>Ascending</Dropdown.Item>
+                                    <Dropdown.Item className={`dropdown-item ${st["list"]}`} onClick={() => {
+                                        setSortOrder("Desc");
+                                        setIsSearching(false);
+                                    }}>Descending</Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>
                     </div>
                 </div>
 
-                <table className="table table-hover">
+                <table className={`table table-hover ${st["list"]}`}>
                     <thead>
-                    <tr className="title-1">
-                        <th style={{ color: '#a1a3a3' }} onClick={() => handleSortChange("productCode")}>
+                    <tr className={st["title-1"]}>
+                        <th style={{color: '#a1a3a3'}} onClick={() => handleSortChange("productCode")}>
                             Code <i className={`bi bi-caret-${sortOrder === "asc" ? "up" : "down"}`}></i>
                         </th>
-                        <th style={{ color: '#a1a3a3' }} onClick={() => handleSortChange("productName")}>
+                        <th style={{color: '#a1a3a3'}} onClick={() => handleSortChange("productName")}>
                             Name <i className={`bi bi-caret-${sortOrder === "asc" ? "up" : "down"}`}></i>
                         </th>
-                        <th style={{ color: '#a1a3a3' }} onClick={() => handleSortChange("productPrice")}>
+                        <th style={{color: '#a1a3a3'}} onClick={() => handleSortChange("productPrice")}>
                             Price <i className={`bi bi-caret-${sortOrder === "asc" ? "up" : "down"}`}></i>
                         </th>
                         <th style={{color: '#a1a3a3'}}>Category</th>
                         <th style={{color: '#a1a3a3'}}>Action</th>
                     </tr>
                     </thead>
-                        <tbody>
-                        {products && products.map((item) => {
-                            const copiedPrd = {...item};
-                            return (
-                                <tr key={copiedPrd.productId}>
-                                    <td>{copiedPrd.productCode}</td>
-                                    <td>{copiedPrd.productName}</td>
-                                    <td>{copiedPrd.productPrice}</td>
-                                    <td>{copiedPrd.category ? copiedPrd.category.categoryName : "N/A"}</td>
-                                    <td>
-                                        <Dropdown>
-                                            <Dropdown.Toggle
-                                                variant="link"
-                                                id="dropdown-basic"
-                                                className="btn-dots-1"
-                                                style={{
-                                                    border: 'none',
-                                                    borderRadius: '50px',
-                                                    backgroundColor: 'white',
-                                                    color: '#a1a3a3',
-                                                    padding: '0.5rem',
-                                                }}
-                                            >
-                                                <i className="bi bi-three-dots"></i>
-                                            </Dropdown.Toggle>
+                    <tbody>
+                    {products && products.map((item) => {
+                        const copiedPrd = {...item};
+                        return (
+                            <tr key={copiedPrd.productId}>
+                                <td>{copiedPrd.productCode}</td>
+                                <td>{copiedPrd.productName}</td>
+                                <td>
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(copiedPrd.productPrice)}
+                                </td>
+                                <td>{copiedPrd.category ? copiedPrd.category.categoryName : "N/A"}</td>
+                                <td className={st["list"]}>
+                                    <Dropdown>
+                                        <Dropdown.Toggle
+                                            variant="link"
+                                            id="dropdown-basic"
+                                            className={st["btn-dots-1"]}
+                                            style={{
+                                                border: 'none',
+                                                borderRadius: '50px',
+                                                backgroundColor: 'white',
+                                                color: '#a1a3a3',
+                                                padding: '0.5rem',
+                                            }}
+                                        >
+                                            <i className="bi bi-three-dots"></i>
+                                        </Dropdown.Toggle>
 
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item className="dropdown-item-1" as={Link}
-                                                               to={`/productDetail/${item.productId}`}>
-                                                    Detail <i className="fa-solid fa-circle-info icon-hover-1"></i>
-                                                </Dropdown.Item>
-                                                <Dropdown.Item className="dropdown-item-1" as={Link}
-                                                               to={`/product/${item.productId}`}>
-                                                    Update <i className="fa-solid fa-pen-to-square icon-hover-1"></i>
-                                                </Dropdown.Item>
-                                                <Dropdown.Item className="dropdown-item-1"
-                                                               onClick={() => handleSHow(item)}>
-                                                    Delete <i className="fa-solid fa-trash-can icon-hover-1"></i>
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </td>
-                                </tr>
-                            )
-                        })}
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item className="dropdown-item" as={Link}
+                                                           to={`/productDetail/${item.productId}`}>
+                                                Detail <i className={`fa-solid fa-circle-info ${st["icon-hover-1"]}`}></i>
+                                            </Dropdown.Item>
+                                            <Dropdown.Item className="dropdown-item" as={Link}
+                                                           to={`/product/${item.productId}`}>
+                                                Update <i className={`fa-solid fa-pen-to-square ${st["icon-hover-1"]}`}></i>
+                                            </Dropdown.Item>
+                                            <Dropdown.Item className="dropdown-item"
+                                                           onClick={() => handleSHow(item)}>
+                                                Delete <i className={`fa-solid fa-trash-can ${st["icon-hover-1"]}`}></i>
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </td>
+                            </tr>
+                        )
+                    })}
                     </tbody>
                 </table>
                 {/* Nút chuyển trang */}
                 <div className="pagination">
                     <button
                         style={{backgroundColor: "#bd965f", color: "#f5f5f5"}}
-                        className="btn"
+                        className={`btn ${st["btn-page"]}`}
                         disabled={currentPage === 0}
                         onClick={() => handlePageChange(currentPage - 1)}
                     >
@@ -385,7 +403,7 @@ function ProductList() {
 
                     <button
                         style={{backgroundColor: "#bd965f", color: "#f5f5f5"}}
-                        className="btn"
+                        className={`btn ${st["btn-page"]}`}
                         disabled={currentPage === totalPages - 1}
                         onClick={() => handlePageChange(currentPage + 1)}
                     >

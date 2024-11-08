@@ -32,11 +32,11 @@ body {
     border-bottom-right-radius: 10px; /* Bo tròn góc phải dưới */
 }
 
-.nav-tabs .nav-link.active {
+.list :global(.nav-tabs .nav-link.active) {
     border-bottom: 3px solid #0d6efd; /* Đường viền cho tab đang chọn */
 }
 
-.nav-tabs .nav-link {
+.list :global(.nav-tabs .nav-link) {
     color: inherit; /* Kế thừa màu từ phần tử cha */
 }
 
@@ -69,29 +69,26 @@ body {
     cursor: pointer;
 }
 
-.table-1 {
+.list :global(.table ){
     margin-top: 1rem;
 }
 
-.btn-group .btn {
-    border-radius: 5px;
-}
 
-.dropdown-menu-1 {
+.list :global(.dropdown-menu) {
     background-color: #f8f9fa; /* Màu nền danh sách */
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     padding: 10px 0;
 }
 
-.dropdown-item-1 {
+.list :global(.dropdown-item) {
     padding: 10px 20px;
     color: #333; /* Màu chữ */
     display: flex;
     justify-content: space-between;
 }
 
-.dropdown-item-1:hover {
+.list :global(.dropdown-item:hover) {
     background-color: #bd965f; /* Màu nền khi hover */
     color: white;
 }
@@ -102,7 +99,7 @@ body {
     transition: color 0.01s ease;
 }
 
-.dropdown-item-1:hover .icon-hover-1 {
+.list :global(.dropdown-item:hover) .icon-hover-1 {
     color: white;
 }
 
@@ -144,4 +141,11 @@ h3.container-1 {
     border-color: #bd965f; /* Đổi màu border khi focus (sử dụng màu bạn muốn) */
     outline: none; /* Bỏ outline mặc định */
     box-shadow: 0 0 0 0.2rem #c79f64; /* Hiệu ứng đổ bóng khi focus */
+}
+.btn-page:hover {
+    background-color: #a67b48; /* Màu nền khi hover */
+    color: #ffffff; /* Màu chữ khi hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hiệu ứng đổ bóng */
+    transform: scale(1.05); /* Phóng to nhẹ nút */
+    transition: all 0.01s ease; /* Hiệu ứng chuyển động mượt */
 }

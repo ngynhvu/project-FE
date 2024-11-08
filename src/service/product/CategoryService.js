@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const URL_CATEGORY = "http://localhost:8080/api/category";
-const token = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im5ndXllbnZ1Iiwic3ViIjoibmd1eWVudnUiLCJleHAiOjE3MzM4ODkzNTN9.24Q3_H3BDt1PdJ2qV2go-RnBJP0EFS7hIOOF1f2gzPQ";
+localStorage.setItem('token', "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im5ndXllbnZ1Iiwic3ViIjoibmd1eWVudnUiLCJleHAiOjE3MzQ0MTE2MjB9.7iLdP5H8RwI3gWyzwmwkL0jSz1BVKcptMSNt8yuNcsQ");
 export const getAllCategories = async () => {
     try {
         const response = await axios.get(URL_CATEGORY);
@@ -19,6 +19,7 @@ export const getCategoryById = async (id) => {
     }
 }
 export const updateCategory = async (category, id) => {
+    const token = localStorage.getItem('token');
     try {
         await axios.patch(`${URL_CATEGORY}/${id}`, category, {
             headers:{
@@ -31,6 +32,7 @@ export const updateCategory = async (category, id) => {
     }
 }
 export const deleteCategory = async (id) => {
+    const token = localStorage.getItem('token');
     try {
         await axios.delete(`${URL_CATEGORY}/${id}`, {
             headers: {
@@ -43,6 +45,7 @@ export const deleteCategory = async (id) => {
     }
 }
 export const createCategory = async (category) => {
+    const token = localStorage.getItem('token');
     try {
         await axios.post(`${URL_CATEGORY}`, category, {
             headers: {
@@ -52,5 +55,17 @@ export const createCategory = async (category) => {
         })
     }catch (e) {
         console.log(e.message);
+    }
+}
+export const checkCategoryName = async (categoryName) => {
+    try {
+        const response = await axios.get(`${URL_CATEGORY}?categoryName=${categoryName}`,{
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        })
+        return response.data;
+    }catch (e) {
+        console.log(e.message)
     }
 }

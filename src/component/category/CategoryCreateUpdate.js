@@ -1,11 +1,17 @@
 import {useNavigate, useParams} from "react-router";
 import React, {useEffect, useState} from "react";
-import {createCategory, getAllCategories, getCategoryById, updateCategory} from "../../service/product/CategoryService";
+import {
+    checkCategoryName,
+    createCategory,
+    getAllCategories,
+    getCategoryById,
+    updateCategory
+} from "../../service/product/CategoryService";
 import * as Yup from "yup";
 import {Link} from "react-router-dom";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import {toast} from "react-toastify";
-import "../product/create-update/create-update.css"
+import st from "../product/create-update/create-update.module.css"
 function CategoryCreateUpdate() {
     const [category, setCategory] = useState();
     const navigate = useNavigate();
@@ -29,6 +35,11 @@ function CategoryCreateUpdate() {
         }else {
             getAllCategories().then((data) => {
                 if (data && data.length > 0){
+                    data = data.sort((a,b) => {
+                        const numA = parseInt(a.categoryCode.split('-')[1]);
+                        const numB = parseInt(b.categoryCode.split('-')[1]);
+                        return numA - numB;
+                    })
                     const lastCode = data[data.length - 1].categoryCode;
                     const lastNumber = parseInt(lastCode.split("-")[1]);
                     const newCode = `C-${lastNumber + 1}`;
@@ -52,7 +63,12 @@ function CategoryCreateUpdate() {
         categoryCode: Yup.string().matches(/^C-\d+$/, "Follow form C-X").required("categoryCode must be available"),
         categoryName: Yup.string().min(3, "Category name must be at least 3 characters").required("Not empty")
     }
-    const handleSubmit = (value) => {
+    const handleSubmit = async (value) => {
+        const checkName = await checkCategoryName(value.categoryName);
+        if (checkName){
+            toast.error("Category name already exist");
+            return ;
+        }
         if (id){
             updateCategory(value, id).then(() => {
                 toast.success("Add new category success");
@@ -67,7 +83,7 @@ function CategoryCreateUpdate() {
     }
     return(
         <>
-            <div className="outer-div">
+            <div className={`${st["outer-div"]} ${st["create-update"]}`}>
                 <div className="container mt-5">
                     <div className="row g-3">
                         <h1 style={{
@@ -85,7 +101,7 @@ function CategoryCreateUpdate() {
                                     <nav className="col-md-3 vertical-nav">
                                         <div className="nav flex-column">
                                             <Link to={'/product'} className="nav-link">Home</Link>
-                                            <a className="nav-link active" href="#">Create Product</a>
+                                            <a className="nav-link active" href="#">{id ? "Update Category":"Create Category"}</a>
                                         </div>
                                     </nav>
                                 </div>
@@ -108,7 +124,7 @@ function CategoryCreateUpdate() {
                                                 <Field
                                                     type="text"
                                                     name="categoryName"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     placeholder="Enter product name"
                                                 />
                                             </div>
@@ -123,7 +139,7 @@ function CategoryCreateUpdate() {
                                                 <Field
                                                     type="text"
                                                     name="categoryCode"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     readOnly
                                                 />
                                             </div>
@@ -135,9 +151,9 @@ function CategoryCreateUpdate() {
 
                                         {/* Nút gửi */}
                                         <div className="d-flex justify-content-between">
-                                            <Link to="/category" style={{ color: "black" }} className="btn-hover">Cancel</Link>
+                                            <Link to="/category" style={{ color: "black" }} className={st["btn-hover"]}>Cancel</Link>
                                             <button type="submit"   onClick={() => console.log("Button clicked")} // Log để kiểm tra
-                                                    className="btn btn-secondary btn-hover" style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
+                                                    className={`btn btn-secondary ${st["btn-hover"]}`} style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
                                                 {id ? "Update Category" : "Create Category"}
                                                 <i className="bi bi-arrow-right"></i>
                                             </button>

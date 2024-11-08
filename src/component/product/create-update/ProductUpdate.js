@@ -1,20 +1,21 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {getAllCategories} from "../../../service/product/CategoryService";
-import {getProductById, updateProduct} from "../../../service/product/ProductService";
+import {checkProductName, getProductById, updateProduct} from "../../../service/product/ProductService";
 import * as Yup from "yup";
 import {Link} from "react-router-dom";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage} from "../../../configFirebase/configFirebase";
 import {toast} from "react-toastify";
-import "./create-update.css";
+import st from "./create-update.module.css";
 function ProductUpdate() {
     const [product, setProduct] = useState();
     const [categories, setCategories] = useState([]);
     const {id} =useParams();
     const [imageUrl, setImageUrl] = useState("");
     const navigate = useNavigate();
+    // const [check, setCheck] = useState(true);
     useEffect(() => {
         getAllCategories().then((data) => {
             console.log(data);
@@ -39,7 +40,17 @@ function ProductUpdate() {
             return null;
         }
     }
-    const editProduct = (value) => {
+    const editProduct = async (value) => {
+        let isNameChanged = product.productName !== value.productName; // Kiểm tra xem tên có thay đổi không
+        let isNameValid = true;
+
+        if (isNameChanged) {
+            isNameValid = await checkProductName(value.productName);
+            if (!isNameValid) {
+                toast.error("Product name already exists");
+                return;
+            }
+        }
         console.log("Form value:", value);
         value.productImgUrl = imageUrl;
         const prdData = {
@@ -65,7 +76,7 @@ function ProductUpdate() {
     }
     return (
         <>
-            <div className="outer-div">
+            <div className={`${st["outer-div"]} ${st["create-update"]}`}>
                 <div className="container mt-5">
                     <div className="row g-3">
                         <h1 style={{
@@ -90,7 +101,13 @@ function ProductUpdate() {
                             </div>
                         </div>
                         <div className="col-md-8">
-                            <Formik initialValues={product}
+                            <Formik initialValues={{
+                                productName: product.productName || '', // Giá trị mặc định cho tên sản phẩm
+                                productPrice: product.productPrice || '', // Giá trị mặc định cho giá sản phẩm
+                                productCode: product.productCode || '', // Giá trị mặc định cho mã sản phẩm
+                                productImgUrl: product.productImgUrl || '', // Giá trị mặc định cho hình ảnh
+                                category: product.category ? product.category.categoryId : '', // Giá trị mặc định cho category
+                            }}
                                     enableReinitialize={true} // Allow Formik to reinitialize when initialValues change
                                     validationSchema={Yup.object(validate)}
                                     validateOnMount={true}
@@ -112,7 +129,7 @@ function ProductUpdate() {
                                         <Field name="productImgUrl">
                                             {({ form }) => (
                                                 <div className="mb-3">
-                                                    <label htmlFor="productImgUrl" className="form-label custom-file-label">
+                                                    <label htmlFor="productImgUrl" className={`form-label ${st["custom-file-label"]}`}>
                                                         <input
                                                             type="file"
                                                             className="form-control"
@@ -150,7 +167,7 @@ function ProductUpdate() {
                                                 <Field
                                                     type="text"
                                                     name="productName"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     placeholder="Enter product name"
                                                 />
                                             </div>
@@ -165,7 +182,7 @@ function ProductUpdate() {
                                                 <Field
                                                     type="text"
                                                     name="productCode"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     readOnly
                                                 />
                                             </div>
@@ -180,7 +197,7 @@ function ProductUpdate() {
                                                 <Field
                                                     type="text"
                                                     name="productPrice"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     placeholder="Enter product price"
                                                 />
                                             </div>
@@ -195,9 +212,12 @@ function ProductUpdate() {
                                                 <Field
                                                     as="select"
                                                     name="category"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                 >
-                                                    <option value="">Select Category:</option>
+                                                    {/*/!* Kiểm tra nếu product.category tồn tại *!/*/}
+                                                    {/*{product.category && (*/}
+                                                    {/*    <option value={product.category.categoryId}>{product.category.categoryName}</option>*/}
+                                                    {/*)}                */}
                                                     {categories.map((category) => (
                                                         <option key={category.categoryId} value={category.categoryId}>
                                                             {category.categoryName}
@@ -211,9 +231,9 @@ function ProductUpdate() {
 
                                         {/* Nút gửi */}
                                         <div className="d-flex justify-content-between">
-                                            <Link to="/product" style={{ color: "black" }} className="btn-hover">Cancel</Link>
+                                            <Link to="/product" style={{ color: "black" }} className={st["btn-hover"]}>Cancel</Link>
                                             <button type="submit"   onClick={() => console.log("Button clicked")} // Log để kiểm tra
-                                                    className="btn btn-secondary btn-hover" style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
+                                                    className={`btn btn-secondary ${st["btn-hover"]}`} style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
                                                 Update <i className="bi bi-arrow-right"></i>
                                             </button>
                                         </div>

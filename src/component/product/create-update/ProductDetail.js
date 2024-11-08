@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useParams} from "react-router";
 import {getProductById} from "../../../service/product/ProductService";
 import {Link} from "react-router-dom";
-import "./create-update.css";
+import st from "./create-update.module.css";
 
 function ProductDetail() {
     const [product, setProduct] = useState("");
@@ -16,7 +16,7 @@ function ProductDetail() {
         return <div>Loading...</div>
     }
     return (
-        <div className="outer-div">
+        <div className={`${st["outer-div"]} ${st["create-update"]}`}>
             <div className="container mt-5">
                 <div className="row g-3">
                     <div className="col-md-2">
@@ -39,7 +39,7 @@ function ProductDetail() {
                         <hr />
                             <div className="d-flex justify-content-between">
                                 <div><h5 className="card-title">Product Details</h5></div>
-                                <div><Link to={`/product/${id}`} className="edit-hover"><i
+                                <div><Link to={`/product/${id}`} className={st["edit-hover"]}><i
                                     className="fa-solid fa-pen-to-square"></i></Link> </div>
                             </div>
                             <div className="d-flex justify-content-between mt-3">
@@ -52,7 +52,7 @@ function ProductDetail() {
                             </div>
                             <div className="d-flex justify-content-between mt-3">
                                 <div className="text-muted">Product Price</div>
-                                <div>{product.productPrice}</div>
+                                <div>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.productPrice)}</div>
                             </div>
                             <div className="d-flex justify-content-between mt-3">
                                 <div className=" text-muted">Category</div>
@@ -62,7 +62,7 @@ function ProductDetail() {
                                 {/*Nút gửi*/}
                                 <div className="d-flex justify-content-between">
                                     <div>
-                                        <Link to={`/product`} type="button" className="btn btn-secondary btn-hover"
+                                        <Link to={`/product`} type="button" className={`btn btn-secondary ${st["btn-hover"]}`}
                                                 style={{borderRadius: "50px"}}><i
                                             className="bi bi-arrow-left"></i> Back
                                         </Link>

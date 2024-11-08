@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const URL_PRODUCT = "http://localhost:8080/api/product";
-localStorage.setItem('token', "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im5ndXllbnZ1Iiwic3ViIjoibmd1eWVudnUiLCJleHAiOjE3MzM5MDQwNDR9.3Dy69-ETp3rWQ1m13Ttw2VjjjFASdlzqdysshSKx_l0");
+localStorage.setItem('token', "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im5ndXllbnZ1Iiwic3ViIjoibmd1eWVudnUiLCJleHAiOjE3MzQ0MTE2MjB9.7iLdP5H8RwI3gWyzwmwkL0jSz1BVKcptMSNt8yuNcsQ");
 export const getAllProducts = async (page , size, sortBy, sortOrder) => {
     try {
         const response = await axios.get(`${URL_PRODUCT}?page=${page}&size=${size}&sortBy=${sortBy}&sortOrder=${sortOrder}`, {
@@ -106,5 +106,23 @@ export const deleteProduct = async (id) => {
         })
     }catch (e) {
         console.log(e.message)
+    }
+}
+export const checkProductName = async (productName) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${URL_PRODUCT}/checkProductName?productName=${productName}`, {
+            headers:{
+                'Content-Type': 'application',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log("-----------------------------------------------")
+        console.log(response);
+        console.log(response.data);
+        return response.data;
+    }catch (e) {
+        console.log("----------------------lỗi --------------")
+        console.log(e.message);
     }
 }

@@ -2,23 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import "./create-update.css";
+import st from "./create-update.module.css";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import * as Yup from "yup";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {toast} from "react-toastify";
 import {getAllCategories} from "../../../service/product/CategoryService";
-import {createProduct, getAllProducts} from "../../../service/product/ProductService";
+import {checkProductName, createProduct, getAllProducts} from "../../../service/product/ProductService";
 import {storage} from "../../../configFirebase/configFirebase";
 import {Link} from "react-router-dom";
 
 
 function ProductCreate() {
-    const [category, setCategory] = useState();
     const [categories, setCategories] = useState([]);
     const [productImg, setProductImg] = useState("");
     const [imageUrl, setImageUrl] = useState("");
-    const [nextProductCode, setNextProductCode] = useState("")
     const [initialValues, setInitialValues] = useState({
         productImgUrl: "",
         productName: "",
@@ -33,73 +31,61 @@ function ProductCreate() {
             setCategories(data);
             console.log(data)
         });
-
-        getAllProducts(0, 100, "productCode", "asc").then((response) => {
-            let { content } = response.data;
-
-            if (content && content.length > 0) {
-                // Sắp xếp content theo productCode
-                content = content.sort((a, b) => {
-                    const numA = parseInt(a.productCode.split('-')[1]);
-                    const numB = parseInt(b.productCode.split('-')[1]);
-                    return numA - numB; // Sắp xếp theo giá trị số
-                });
-
-                const lastCode = content[content.length - 1].productCode;
-                console.log("Mã sản phẩm cuối cùng sau sắp xếp:", lastCode);
-                const lastNumber = parseInt(lastCode.split('-')[1]);
-
-                if (!isNaN(lastNumber)) {
-                    const newCode = `PR-${lastNumber + 1}`;
-                    setNextProductCode(newCode);
-                    setInitialValues((prevValues) => ({
-                        ...prevValues,
-                        productCode: newCode
-                    }));
-                }
-            } else {
-                setNextProductCode("PR-1");
-                setInitialValues((prevValues) => ({
-                    ...prevValues,
-                    productCode: "PR-1"
-                }));
-            }
-        });
     }, []);
-    // tai hinh anh len firebase
-    const handleUpload = async (file) => {
-        if (!file) return;
-        try {
-            const storageRef = ref(storage, `productImg/${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(snapshot.ref); // lay url cua anh da tai len
-            return url;
-        }catch (e) {
-            console.error("Error uploading file:",e)
-            return null;
-        }
-    }
     const saveProduct = async (value) => {
-        console.log("Form Values:", value); // Thêm log để xem giá trị form
-        const imgUrl = imageUrl; //su dung url da tai len tu state
-        if (imgUrl){
-            value.productImgUrl = imgUrl;
-            // Tìm category tương ứng từ danh sách categories
-            const productData = {
-                ...value,
-                category:{
-                    categoryId: value.category
-                }
-            }
-            console.log(productData)
-            createProduct(productData).then(() => {
-                toast.success("Add new success");
-                navigate("/product");
-            })
-        }else {
-            toast.error("Image URL is empty. Please upload an image."); // Thông báo nếu không có URL hình ảnh
+        console.log("start Product")
+        const checkPrdName = await checkProductName(value.productName);
+        console.log("aaaaaa", checkPrdName)
+        if (checkPrdName) {
+            toast.error("Product name already exist");
+            return ;
         }
-    }
+        console.log("Form Values:", value); // Thêm log để xem giá trị form
+        // const imgUrl = imageUrl; //su dung url da tai len tu stat
+        // if (productImg){
+        //     value.productImgUrl = imgUrl;
+        //     // Tìm category tương ứng từ danh sách categories
+        //     const productData = {
+        //         ...value,
+        //         category:{
+        //             categoryId: value.category
+        //         }
+        //     }
+        //     console.log(productData)
+        //     createProduct(productData).then(() => {
+        //         toast.success("Add new success");
+        //         navigate("/product");
+        //     })
+        // }else {
+        //     toast.error("Image URL is empty. Please upload an image."); // Thông báo nếu không có URL hình ảnh
+        // }
+        let imgUrl = "";
+        if (productImg){
+            try {
+                const storageRef = ref(storage, `productImg/${productImg.name}`);
+                const snapshot = await uploadBytes(storageRef, productImg);
+                imgUrl = await getDownloadURL(snapshot.ref);
+            }catch (e) {
+                console.error("Error uploading file:", e);
+                toast.error("Failed to upload image");
+                return;
+            }
+        }
+        const productData = {
+            ...value,
+            productImgUrl: imgUrl,
+            category: {
+                categoryId: value.category
+            }
+        };
+        createProduct(productData).then(() => {
+            toast.success("Add new success");
+            navigate("/product");
+        }).catch((e) => {
+            console.error("Error creating product:", e);
+            toast.e("Failed to save product");
+        });
+    };
     const validate = {
         productName: Yup.string().required("Product must not be empty").min(3, "Product name at least 3 characters"),
         productPrice: Yup.number().positive("Price must be greater than 0 VND").required("Product price is required"),
@@ -112,8 +98,8 @@ function ProductCreate() {
 
     return (
         <>
-            <div className="outer-div">
-                <div className="container mt-5">
+            <div className={`${st["outer-div"]} ${st["create-update"]}`}>
+                <div className={`container mt-5`}>
                     <div className="row g-3">
                         <h1 style={{
                             textAlign: "center",
@@ -153,25 +139,24 @@ function ProductCreate() {
                                         }
                                     }}
                             >
-                                {() => (
+                                {({ setFieldValue }) => (
                                     <Form>
                                         {/* Input cho tải lên hình ảnh */}
                                         <Field name="productImgUrl">
                                             {({ form }) => (
                                                 <div className="mb-3">
-                                                    <label htmlFor="productImgUrl" className="form-label custom-file-label">
+                                                    <label htmlFor="productImgUrl" className={`form-label ${st["custom-file-label"]}`}>
                                                         <input
                                                             type="file"
                                                             className="form-control"
                                                             id="productImgUrl"
                                                             accept="image/*"
                                                             style={{ width: "100%" }}
-                                                            onChange={async (e) => {
+                                                            onChange={(e) => {
                                                                 const file = e.target.files[0];
                                                                 setProductImg(file); // lưu file đã tải lên
-                                                                const url = await handleUpload(file); // tải lên và lấy URL
-                                                                setImageUrl(url); // lưu vào state để hiển thị
-                                                                form.setFieldValue("productImgUrl", url); // lưu URL để submit vào database
+                                                                const objectUrl = URL.createObjectURL(file);
+                                                                setImageUrl(objectUrl); // Hiển thị ảnh từ file trong máy
                                                             }}
                                                             hidden
                                                         />
@@ -198,27 +183,11 @@ function ProductCreate() {
                                                 <Field
                                                     type="text"
                                                     name="productName"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     placeholder="Enter product name"
                                                 />
                                             </div>
                                             <ErrorMessage name="productName" component="p" className="text-danger" />
-                                        </div>
-
-                                        {/* Input cho mã sản phẩm */}
-                                        <div className="mb-3">
-                                            <label htmlFor="productCode" className="form-label">Code</label>
-                                            <div className="input-group">
-                                                <span className="input-group-text" id="code-icon"><i className="bi bi-qr-code"></i></span>
-                                                <Field
-                                                    type="text"
-                                                    name="productCode"
-                                                    className="form-control form-input-custom"
-                                                    value={nextProductCode}
-                                                    readOnly
-                                                />
-                                            </div>
-                                            <ErrorMessage name="productCode" component="p" className="text-danger" />
                                         </div>
 
                                         {/* Input cho giá sản phẩm */}
@@ -229,8 +198,10 @@ function ProductCreate() {
                                                 <Field
                                                     type="text"
                                                     name="productPrice"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]}`}
                                                     placeholder="Enter product price"
+                                                    // value={formatPriceInput(initialValues.productPrice)}
+                                                    // onChange={(e) => setFieldValue("productPrice", formatPriceInput(e.target.value))}
                                                 />
                                             </div>
                                             <ErrorMessage name="productPrice" component="p" className="text-danger" />
@@ -244,9 +215,8 @@ function ProductCreate() {
                                                 <Field
                                                     as="select"
                                                     name="category"
-                                                    className="form-control form-input-custom"
+                                                    className={`form-control ${st["form-input-custom"]} ${st["select-container"]}`}
                                                 >
-                                                    <option value="">Select Category:</option>
                                                     {categories.map((category) => (
                                                         <option key={category.categoryId} value={category.categoryId}>
                                                             {category.categoryName}
@@ -260,9 +230,9 @@ function ProductCreate() {
 
                                         {/* Nút gửi */}
                                         <div className="d-flex justify-content-between">
-                                            <Link to="/product" style={{ color: "black" }} className="btn-hover">Cancel</Link>
+                                            <Link to="/product" style={{ color: "black" }} className={st["btn-hover"]}>Cancel</Link>
                                             <button type="submit"   onClick={() => console.log("Button clicked")} // Log để kiểm tra
-                                                    className="btn btn-secondary btn-hover" style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
+                                                    className={`btn btn-secondary ${st["btn-hover"]}`} style={{ border: "none", borderRadius: "50px", backgroundColor: "#bd965f" }}>
                                                 Create <i className="bi bi-arrow-right"></i>
                                             </button>
                                         </div>

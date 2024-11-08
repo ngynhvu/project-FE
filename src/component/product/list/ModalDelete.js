@@ -18,7 +18,7 @@ function ModalDelete({show, setShow, product, currentPage, sortBy, sortOrder, ge
         <>
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Modal heading</Modal.Title>
+                    <Modal.Title>Delete Product</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Do you want to delete : {product.productName}</Modal.Body>
                 <Modal.Footer>

@@ -18,7 +18,7 @@ function ModalDeleteCategory({show, setShow, category, getCategories}) {
         <>
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Modal heading</Modal.Title>
+                    <Modal.Title>Delete Category</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Do you want to delete : {category.categoryName}</Modal.Body>
                 <Modal.Footer>
